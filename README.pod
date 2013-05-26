@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# File   :    blastnbury.pl
+# File   :      blastnbury.pl
 # History:  	2013-04-23 (dominik) first implementation
 # Coming soon:  [S]kip, [B]ack, [A]bort, [M]ore	
 #
@@ -22,11 +22,10 @@ B<blastnbury.pl> [B<-q>] [B<-noblast>] [B<-hit> B<-report> B<-save>]
 =head1 DESCRIPTION
 
 B<blastnbury> takes a fasta file of DNA sequences and BLASTs them against nt, 
-followed by saving the each resulting BLAST report into a XML file. SearchIO loops 
-then through all XML files extracting relevant information, and presents them to 
-the user. The user then decides which of the *best hits* are saved. The results 
-of all table format and subsequently exported to an CSV file (contains headers
-of fields in table)
+followed by saving the each resulting BLAST report into a tab-separated file (.txt). 
+The script then loops the files extracting relevant information, and presents them to 
+the user. The user then decides which of the "best" hits are saved. The selected results 
+of all sequences are then exported to a CSV file.
 
 =head1 OPTIONS
 
