@@ -41,7 +41,7 @@ No remote BLAST is performed. For analysing existing BLAST reports.
 
 =item B<-hit>
 
-Number of BLAST hits that are saved in XML files (default: 100)
+Number of BLAST hits per sequence that are saved in tab-delimited files (default: 100)
 
 =item B<-report>
 
