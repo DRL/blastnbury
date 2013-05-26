@@ -1,0 +1,71 @@
+##############################################################################
+#
+# File   :    blastnbury.pl
+# History:  	2013-04-23 (dominik) first implementation
+# Coming soon:  [S]kip, [B]ack, [A]bort, [M]ore	
+#
+##############################################################################
+#
+#  Perl script for performing a remote BLAST of a query against nt w/ XML output, 
+#  followed by user selection of sorted hits saved as CVS (OSIRIS import)
+#
+##############################################################################
+
+=head1 
+
+blast'n'bury - BLAST your sequences and bury them in a database
+
+=head1 SYNOPSIS
+
+B<blastnbury.pl> [B<-q>] [B<-noblast>] [B<-hit> B<-report> B<-save>]
+
+=head1 DESCRIPTION
+
+B<blastnbury> takes a fasta file of DNA sequences and BLASTs them against nt, 
+followed by saving the each resulting BLAST report into a XML file. SearchIO loops 
+then through all XML files extracting relevant information, and presents them to 
+the user. The user then decides which of the *best hits* are saved. The results 
+of all table format and subsequently exported to an CSV file (contains headers
+of fields in table)
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<-q>
+    
+FASTA file of DNA sequence(s)
+
+=item B<-noblast>
+    
+No remote BLAST is performed. For analysing existing BLAST reports.
+
+=item B<-hit>
+
+Number of BLAST hits that are saved in XML files (default: 100)
+
+=item B<-report>
+
+Number of "best" sorted Blast hits from which the user can choose (default: 15)
+
+=item B<-save>
+
+Number of "best" sorted Blast hits the user can choose for the CSV file (default: 5). Do not change w/o telling OSIRIS.
+
+=item B<-man>
+    
+Prints the manual page and exits.
+
+=back
+
+=head1 DIAGNOSTICS
+
+=over 4
+
+=back
+
+=head1 AUTHOR
+
+Dominik R. Laetsch, dominik.laetsch@gmail.com
+
+=cut
