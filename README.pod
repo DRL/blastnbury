@@ -6,8 +6,8 @@
 #
 ##############################################################################
 #
-#  Perl script for performing a remote BLAST of a query against nt w/ XML output, 
-#  followed by user selection of sorted hits saved as CVS (OSIRIS import)
+#  Perl script for performing a remote BLAST of a query against nt, 
+#  followed by user selection of sorted hits saved as CVS (OSIRIS import).
 #
 ##############################################################################
 
