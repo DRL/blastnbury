@@ -26,8 +26,8 @@ B<blastnbury.pl> [B<-q>] [B<-noblast>] [B<-hit> B<-report> B<-save>]
 =head1 DESCRIPTION
 
 B<blastnbury> takes a fasta file of DNA sequences and BLASTs them against nt, 
-followed by saving the each resulting BLAST report into a tab-separated file (.txt). 
-The script then loops the files extracting relevant information, and presents them to 
+followed by saving each resulting BLAST report into a tab-separated file (.txt). 
+The script then loops through the files extracting relevant information, and presents them to 
 the user. The user then decides which of the "best" hits are saved. The selected results 
 of all sequences are then exported to a CSV file.
 
