@@ -37,7 +37,15 @@ of all sequences are then exported to a CSV file.
 
 =item B<-q>
     
-FASTA file of DNA sequence(s)
+FASTA file of DNA sequence(s). Sequence names (headers) have to be formatted in the following way: 
+
+B<>>B<AAA>_B<BBBB>_B<CCC>, where 
+
+B<AAA> = sequence prefix (e.g. organism, collection, experiment).
+
+B<BBBB>= sequence code (e.g. number, strain code).
+
+B<CCC> = genetic region (e.g. 18S, 28S, ITS, CO1).
 
 =item B<-noblast>
     
@@ -63,10 +71,6 @@ Prints the manual page and exits.
 
 =head1 DIAGNOSTICS
 
-=over 4
-
-=back
-
 =head1 AUTHOR
 
 Dominik R. Laetsch, dominik.laetsch@gmail.com
@@ -85,8 +89,8 @@ use Data::Dumper;
 use Bio::SeqIO;
 use Term::ANSIColor;
 use POSIX;
-# ----------------------------------------------------------------------------
-#
+
+
 ##############################################################################
 #				 Parsing BLAST results
 ##############################################################################
@@ -101,7 +105,8 @@ use POSIX;
 # Fields are populated generating the following structure:
 #	
 # 		%data 	=>	$seq_id	=>	'query'	=>	'seq'		=>	$query_object->seq
-#										=>	'length'	=>	$query_object->length	
+#										=>	'length'	=>	$query_object->length	 
+#										=>	'region'	=>	substr($query_object->length, 9) 
 #							=>	'hits'	=>	$hit_acc	=>	'link'		=>	"http://www.ncbi.nlm.nih.gov/nuccore/".$hit_acc
 #														=>	'length'	=>	$hit_length
 #														=>	'desc'		=>	&TRUNCATE_DESC($hit_desc, $truncate_desc_to_length)
@@ -172,6 +177,7 @@ my ($query_file_object, $query_object, $seq_id);
 my (@query_objects, @query_ids, %query_seqs, %query_lengths);
 my $datestamp;
 my $start_of_read=time();
+print strftime("[%H:%M:%S]",localtime)." - Reading ".$query_file."\n";
 # The $query_file is read using Bio::Seq.
 $query_file_object = Bio::SeqIO->new(
 	'-format' => 'fasta', 
@@ -183,15 +189,37 @@ $query_file_object = Bio::SeqIO->new(
 #										=>	'length'=>	$query_object->length	
 #
 my $number_of_sequences=0;
+my @illegal_sequence_identifiers;
+my %occurences_of_seq_id;
+
 while ($query_object = $query_file_object->next_seq) {
 	if(defined $query_object){
 		$number_of_sequences++;
 		$seq_id= $query_object->id;
-		#$data{$seq_id}{'obj'}=$query_object;
-		$data{$seq_id}{'id'}=$query_object->id;
-		$data{$seq_id}{'query'}{'seq'}=$query_object->seq;
-		$data{$seq_id}{'query'}{'length'}=$query_object->length;
+		if ($seq_id =~ /^[A-Za-z0-9]{3}[_]{1}[A-Za-z0-9]{4}[_]{1}/){
+			if (exists($data{$seq_id})){
+				$occurences_of_seq_id{$seq_id}++;
+				$seq_id=$seq_id."_".$occurences_of_seq_id{$seq_id};
+			}
+			else{
+				$occurences_of_seq_id{$seq_id}=1;
+			}
+			$data{$seq_id}{'id'}=$seq_id;
+			$data{$seq_id}{'query'}{'name'}= substr ($seq_id, 0, 8); # XXX_0000_
+			$data{$seq_id}{'query'}{'region'}= substr ($seq_id, 9, 3); # XXX_0000_
+			$data{$seq_id}{'query'}{'seq'}=$query_object->seq;
+			$data{$seq_id}{'query'}{'length'}=$query_object->length;
+		}
+		else {
+			push @illegal_sequence_identifiers, $seq_id; 
+		}
     }
+}
+if (scalar @illegal_sequence_identifiers >= 1){
+	foreach (@illegal_sequence_identifiers) {
+		print strftime("[%H:%M:%S]",localtime)." - Illegal sequence name in ".$_."\n";
+	}
+	die strftime("[%H:%M:%S]",localtime)." - Please correct the sequence names in ".$query_file."\n";
 }
 
 print strftime("[%H:%M:%S]",localtime)." - Read ".$number_of_sequences." sequence(s) [".&TIME_DIFFERENCE($start_of_read)."sec]\n";
@@ -335,7 +363,7 @@ foreach my $id (sort keys %data){
 
 # Header for CSV file
 open (CSV_FILE, ">".$query_file."_results.csv") || die "Cannot write to ".$query_file."_results.csv\n";
-print CSV_FILE "#BEA_CODE,length,seq,date";
+print CSV_FILE "#BEA_CODE,region,length,seq,date";
 for (my $j = 1; $j < $report_threshold+1; $j++){
 	print CSV_FILE ",HIT_ACC_".$j.",HIT_DESC_".$j.",NUM_OF_HSPS_".$j.",EVAL_".$j.",ID_".$j.",COV_".$j.",SITES_".$j.",NUCDIFF_".$j;
 }
@@ -722,12 +750,12 @@ sub ASK_FOR_USER_INPUT{
 }
 
 # ----------------------------------------------------------------------------
-# &PRINT_HIT_TO_FILE subroutine
+# &PRINT_SEQ_DATA_TO_FILE subroutine
 # ----------------------------------------------------------------------------
 sub PRINT_SEQ_DATA_TO_FILE{
 	my $date = ${shift(@_)}; 
 	my %seq_data = %{shift(@_)};
-	return $seq_data{'id'}.",".$seq_data{'query'}{'length'}.",",$seq_data{'query'}{'seq'}.",".$date;
+	return $seq_data{'query'}{'name'}.",".$seq_data{'query'}{'region'}.",".$seq_data{'query'}{'length'}.",",$seq_data{'query'}{'seq'}.",".$date;
 }
 
 # ----------------------------------------------------------------------------
