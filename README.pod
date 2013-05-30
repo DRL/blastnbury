@@ -1,8 +1,8 @@
 ##############################################################################
 #
 # File   :      blastnbury.pl
-# History:  	2013-04-23 (dominik) first implementation
-# Coming soon:  [S]kip, [B]ack, [A]bort, [M]ore	
+# History:  	2013-04-23 (DRL) first implementation
+#				2013-05-30 (DRL) Changes involving how headers are read
 #
 ##############################################################################
 #
@@ -33,7 +33,15 @@ of all sequences are then exported to a CSV file.
 
 =item B<-q>
     
-FASTA file of DNA sequence(s)
+FASTA file of DNA sequence(s). Sequence names (headers) have to be formatted in the following way: 
+
+B<>>B<AAA>_B<BBBB>_B<CCC>, where 
+
+B<AAA> = sequence prefix (e.g. organism, collection, experiment).
+
+B<BBBB>= sequence code (e.g. number, strain code).
+
+B<CCC> = genetic region (e.g. 18S, 28S, ITS, CO1).
 
 =item B<-noblast>
     
@@ -58,10 +66,6 @@ Prints the manual page and exits.
 =back
 
 =head1 DIAGNOSTICS
-
-=over 4
-
-=back
 
 =head1 AUTHOR
 
