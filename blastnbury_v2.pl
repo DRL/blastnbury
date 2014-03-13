@@ -6,6 +6,8 @@ use warnings;
 #
 # File   :  	blastnbury.pl
 # History:  	2013-04-23 (dominik) first implementation
+# 				2013-07-05 (dominik) sub GET_TAX for getting taxonomy
+#									 through Bio::DB::GenBank for each saved hit.
 # Coming soon:  [S]kip, [B]ack, [A]bort, [M]ore
 #
 ##############################################################################
@@ -87,6 +89,7 @@ use Getopt::Long qw(:config pass_through no_ignore_case);
 use Pod::Usage;
 use Data::Dumper;
 use Bio::SeqIO;
+use Bio::DB::GenBank;
 use Term::ANSIColor;
 use POSIX;
 
@@ -446,6 +449,7 @@ foreach my $id ( sort keys %data ) {
         }
     }
     close(BLAST_HITS);
+
     # Last things
     #print Dumper(\%data);
     print strftime( "[%H:%M:%S]", localtime ) . " = "
@@ -576,8 +580,10 @@ foreach my $id ( sort keys %hash_for_sorting ) {
 
         #&PRINT_LOGO;
         &PRINT_RESULT_HEADER( $id, $data{$id}{'query'}{'length'} );
-        foreach my $sorted_hit_number ( sort { $a <=> $b }
-            keys %{ $hash_for_sorting{$id} } )
+        foreach my $sorted_hit_number (
+            sort { $a <=> $b }
+            keys %{ $hash_for_sorting{$id} }
+            )
         {
             if ( $display_counter <= $display_threshold ) {
                 my $acc          = $hash_for_sorting{$id}{$sorted_hit_number};
@@ -712,9 +718,23 @@ sub BLAST {
     print BLASTFILE @outfile_data;
     close(BLASTFILE);
 
-    #print $error;
     # Deleting TEMP file
     unlink($temp_file);
+}
+
+# ----------------------------------------------------------------------------
+# &GET_TAX subroutine
+# ----------------------------------------------------------------------------
+sub GET_TAX {
+
+# my $gbh = Bio::DB::GenBank->new(-delay => 0); # there is enough delay already
+# my $acc = shift @_;
+# my $seq = $gbh->get_Seq_by_id( $acc );
+# my $org = $seq->species;
+# my @taxonomy = $org->classification;
+# my $species = shift @taxonomy;
+# my $taxonomy = join ' | ' , reverse @taxonomy;
+# return $species.",".$taxonomy;
 }
 
 # ----------------------------------------------------------------------------
@@ -959,6 +979,7 @@ sub PRINT_SEQ_DATA_TO_FILE {
 sub PRINT_HIT_TO_FILE {
     my %temp_hit          = %{ shift() };
     my $temp_hit_acc      = $temp_hit{'acc'};
+    my $temp_hit_taxonomy = &GET_TAX($temp_hit_acc);
     my $temp_hit_desc     = $temp_hit{'desc'};
     my $temp_hit_num_hsps = $temp_hit{'main'}{'hsps'};
     my $temp_hit_eval;
@@ -979,6 +1000,7 @@ sub PRINT_HIT_TO_FILE {
     return
           ","
         . $temp_hit_acc . ","
+        . $temp_hit_taxonomy . ","
         . $temp_hit_desc . ","
         . $temp_hit_num_hsps . ","
         . $temp_hit_eval . ","
